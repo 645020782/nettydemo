@@ -43,7 +43,7 @@ public class HttpClient {
 
             URI uri = new URI("http://127.0.0.1:8844");
             String msg = "Are you ok?";
-            DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
+            DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST,
                     uri.toASCIIString(), Unpooled.wrappedBuffer(msg.getBytes("UTF-8")));
 
             // ππΩ®http«Î«Û
