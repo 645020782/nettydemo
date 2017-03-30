@@ -14,38 +14,49 @@ import io.netty.channel.Channel;
 public class FileDemo {
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws IOException {
-		File file = new File("d:/t.txt");
-		System.out.println(file.length());
-		FileInputStream fin = new FileInputStream("d:/t.txt");
+		FileInputStream fin = new FileInputStream("d:/58199.txt");
 		FileChannel channel = fin.getChannel();
-		ByteBuffer dst = ByteBuffer.allocate(25);
-		ByteBuffer bb = ByteBuffer.allocate(20);
+		ByteBuffer dst = ByteBuffer.allocate(1024*10);
+		ByteBuffer bb = ByteBuffer.allocate(1024*3);
+		byte[] bs = new byte[25];
 		int lastPosition = 0;
 		int len = 0;
 		while ((len = channel.read(dst)) != -1){
-			//dst.flip();
-			dst.rewind();
+			dst.flip();
+			//dst.rewind();
 			while (dst.hasRemaining()) {
 				byte b = dst.get();
 				if (b == 13) {
-					int p = bb.position();
-					int l = p - lastPosition ;
-					byte[] bs = new byte[l];
-					lastPosition = p;
-					bb.get(bs);
-					System.out.println(new String(bs,0,bs.length) + "isFinish");
+					readLine(dst, bb);
 				} else {
 					if (bb.position() < bb.limit()) {
 						bb.put(b);
-					} else {
-						bb.rewind();
 					}
 				}
 			}
 			dst.clear();
 	
 		}
+		readLine(dst, bb);
 		channel.close();
 		fin.close();
+	}
+
+	/**
+	 * @param dst
+	 * @param bb
+	 */
+	private static void readLine(ByteBuffer dst, ByteBuffer bb) {
+		byte[] bs;
+		int p = bb.position();
+		bs = new byte[p];
+		if (dst.position() < dst.limit()) {
+			dst.get();
+		}
+		bb.flip();
+		bb.get(bs);
+		String s = new String(bs,0,bs.length);
+		System.out.println(s + " isFinish");
+		bb.clear();
 	}
 }
