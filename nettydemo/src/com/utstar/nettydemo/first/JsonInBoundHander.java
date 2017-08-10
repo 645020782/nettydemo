@@ -26,22 +26,25 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
 public class JsonInBoundHander extends ChannelInboundHandlerAdapter{
-
+	private Map<String, String> parms = new HashMap<String, String>();
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg)
 			throws Exception {
 		HttpRequest request = null;
 		if (msg instanceof HttpRequest) {
 			request = (HttpRequest) msg;
+			parms = this.parse(request);
 		}
 		if (msg instanceof HttpContent) {
 			HttpContent content = (HttpContent) msg;
 			if (content instanceof LastHttpContent) {
 				ByteBuf buf = content.content();
 				buf.release();
+				String name = parms.get("name") == null ? "" : parms.get("name");
+				String age = parms.get("age") == null ? "" : parms.get("age");
 				JSONObject json = new JSONObject();
-				json.put("name", "zhangsan");
-				json.put("age", "18");
+				json.put("name", name);
+				json.put("age", age);
 				String res = json.toString();
 				//生成response
 				FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
@@ -56,13 +59,13 @@ public class JsonInBoundHander extends ChannelInboundHandlerAdapter{
                 ctx.flush();
 			}
 		}
-		 Map<String, String> parse = this.parse(request);
+		 /*Map<String, String> parse = this.parse(request);
 	        Set<Entry<String, String>> entrySet = parse.entrySet();
 	        Iterator<Entry<String, String>> iterator = entrySet.iterator();
 	        while(iterator.hasNext()){
 	        	Entry<String, String> next = iterator.next();
 	        	System.out.println("key:"+next.getKey()+",value:"+next.getValue());
-	        }
+	        }*/
 	}
 
 	@Override
@@ -79,7 +82,7 @@ public class JsonInBoundHander extends ChannelInboundHandlerAdapter{
         HttpMethod method = request.method();
 
         Map<String, String> parmMap = new HashMap<>();
-        System.out.println("method:" + method);
+        //System.out.println("method:" + method);
         if (HttpMethod.GET == method) {
             // 是GET请求
             QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
