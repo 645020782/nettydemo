@@ -9,9 +9,9 @@ import java.util.Map;
 
 public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
 	private NettyMarshallingDecoder nettyMarshallingDecoder;
-	public NettyMessageDecoder(int maxFrameLength, int lengthFieldOffset,
-			int lengthFieldLength) {
-		super(maxFrameLength, lengthFieldOffset, lengthFieldLength);
+	public NettyMessageDecoder(int maxFrameLength, int lengthFieldOffset,  
+            int lengthFieldLength,int lengthAdjustment, int initialBytesToStrip) {
+		super(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip);
 		nettyMarshallingDecoder = MarshallingCodeCFactory.buildMarshallingDecoder();
 	}
 	@Override

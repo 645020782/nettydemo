@@ -36,8 +36,8 @@ public class LoginAuthReqHandler extends ChannelInboundHandlerAdapter{
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception {
-		ctx.close();
 		ctx.fireExceptionCaught(cause);
+		ctx.close();
 	}
 	private NettyMessage buildLoginRep() {
 		NettyMessage message = new NettyMessage();
