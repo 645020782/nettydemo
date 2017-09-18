@@ -26,10 +26,10 @@ public final class MarshallingCodeCFactory {
 		final MarshallerFactory marshallerFactory = Marshalling
 				.getProvidedMarshallerFactory("serial");
 		final MarshallingConfiguration configuration = new MarshallingConfiguration();
-		configuration.setVersion(5);
+		configuration.setVersion(4);
 		UnmarshallerProvider provider = new DefaultUnmarshallerProvider(marshallerFactory,
 				configuration);
-		NettyMarshallingDecoder decoder = new NettyMarshallingDecoder(provider);
+		NettyMarshallingDecoder decoder = new NettyMarshallingDecoder(provider,1024);
 		return decoder;
 	}
 	/**
