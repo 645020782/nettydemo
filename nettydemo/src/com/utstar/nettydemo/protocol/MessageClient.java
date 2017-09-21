@@ -29,16 +29,17 @@ public class MessageClient {
 					sc.pipeline().addLast(new NettyMessageDecoder(1024 * 1024, 4, 4, -8, 0));
 					sc.pipeline().addLast("nettyMessageEncoder", new NettyMessageEncoder());
 					sc.pipeline().addLast("loginAuthReqHandler", new LoginAuthReqHandler());
-					sc.pipeline().addLast("heartBeatReqHandler", new HeartBeatReqHandler());
-					sc.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(50));
+					//sc.pipeline().addLast("heartBeatReqHandler", new HeartBeatReqHandler());
+					//sc.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(50));
 				}
 			});
 			ChannelFuture future = bootstrap.connect("127.0.0.1", port).sync();
+			System.out.println("Netty time Client connected at port " + port);
 			future.channel().close().sync();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
-			executor.execute(new Runnable() {
+		/*	executor.execute(new Runnable() {
 				@Override
 				public void run() {
 					try {
@@ -48,7 +49,7 @@ public class MessageClient {
 						e.printStackTrace();
 					}
 				}
-			});
+			});*/
 		}
 	}
 	public static void main(String[] args) {

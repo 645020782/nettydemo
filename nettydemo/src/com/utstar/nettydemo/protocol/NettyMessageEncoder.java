@@ -3,54 +3,59 @@ package com.utstar.nettydemo.protocol;
 import java.util.List;
 import java.util.Map;
 
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
-import io.netty.handler.codec.marshalling.MarshallingEncoder;
 
 public class NettyMessageEncoder extends MessageToMessageEncoder<NettyMessage> {
-	NettyMarshallingEncoder nettyMarshallingEncoder;
+private NettyMarshallingEncoder marshallingEncoder;
 	
-	public NettyMessageEncoder() {
-		this.nettyMarshallingEncoder = MarshallingCodeCFactory.buildMarshallingEncoder();
+	public NettyMessageEncoder(){
+		marshallingEncoder = MarshallingCodeCFactory.buildMarshallingEncoder();
 	}
-
+	
 	@Override
 	protected void encode(ChannelHandlerContext ctx, NettyMessage msg,
 			List<Object> out) throws Exception {
-		if (msg == null || msg.getHeader() == null) {
+		if(msg == null || msg.getHeader() == null){
 			throw new Exception("The encode message is null");
 		}
-		ByteBuf sendBuffer = Unpooled.buffer();
-		Header header = msg.getHeader();
-		sendBuffer.writeInt(header.getRcrCode());
-		sendBuffer.writeByte(header.getPriority());
-		sendBuffer.writeByte(header.getType());
-		sendBuffer.writeLong(header.getSessionId());
-		sendBuffer.writeInt(header.getLength());
-		sendBuffer.writeInt(header.getAttachment().size());
+		
+		ByteBuf sendBuf = Unpooled.buffer();
+		sendBuf.writeInt(msg.getHeader().getRcrCode());
+		sendBuf.writeInt(msg.getHeader().getLength());
+		sendBuf.writeLong(msg.getHeader().getSessionId());
+		sendBuf.writeByte(msg.getHeader().getType());
+		sendBuf.writeByte(msg.getHeader().getPriority());
+		sendBuf.writeInt(msg.getHeader().getAttachment().size());
+		
 		String key = null;
 		byte[] keyArray = null;
 		Object value = null;
-		for (Map.Entry<String, Object> param : header.getAttachment().entrySet()) {
+		for(Map.Entry<String, Object> param: msg.getHeader().getAttachment().entrySet()){
 			key = param.getKey();
 			keyArray = key.getBytes("UTF-8");
+			sendBuf.writeInt(keyArray.length);
+			sendBuf.writeBytes(keyArray);
 			value = param.getValue();
-			sendBuffer.writeInt(keyArray.length);
-			sendBuffer.writeBytes(keyArray);
-			nettyMarshallingEncoder.encode(ctx, value, sendBuffer);
+			marshallingEncoder.encode(ctx, value, sendBuf);
 		}
 		key = null;
 		keyArray = null;
 		value = null;
-		if (msg.getBody() != null) {
-			nettyMarshallingEncoder.encode(ctx, msg.getBody(), sendBuffer);
-		} else {
-			sendBuffer.writeInt(0);
-			sendBuffer.setIndex(4, sendBuffer.readableBytes());
+		if(msg.getBody() != null){
+			marshallingEncoder.encode(ctx, msg.getBody(), sendBuf);
 		}
 		
+//		sendBuf.writeInt(0);
+		// 在第4个字节出写入Buffer的长度
+		int readableBytes = sendBuf.readableBytes();
+		sendBuf.setInt(4, readableBytes);
+		
+		// 把Message添加到List传递到下一个Handler 
+		out.add(sendBuf);
 	}
 	
 }

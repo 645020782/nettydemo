@@ -22,18 +22,22 @@ public class MessageServer {
 
 			@Override
 			protected void initChannel(SocketChannel sc) throws Exception {
-				sc.pipeline().addLast(new NettyMessageEncoder());
 				sc.pipeline().addLast("nettyMessageDecoder",new NettyMessageDecoder(1024 * 1024, 4, 4, -8, 0));
+				sc.pipeline().addLast(new NettyMessageEncoder());
 				sc.pipeline().addLast("loginAuthRespHandler", new LoginAuthRespHandler());
-				sc.pipeline().addLast("heartBeatRespHandler", new HeartBeatRespHandler());
-				sc.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(50));
+				//sc.pipeline().addLast("heartBeatRespHandler", new HeartBeatRespHandler());
+				//sc.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(50));
 			}
 		});
 		try {
-			bootstrap.bind(port).sync();
-			System.out.println("server start!!");
+			ChannelFuture futrue = bootstrap.bind(port).sync();
+			System.out.println("Netty time Server started at port " + port);
+			futrue.channel().closeFuture().sync();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} finally {
+			boss.shutdownGracefully();
+			worker.shutdownGracefully();
 		}
 	}
 	public static void main(String[] args) {
